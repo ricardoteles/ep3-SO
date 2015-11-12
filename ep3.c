@@ -2,11 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <readline/readline.h>
+#include <readline/history.h>
+#include "fs.h"
 
 #define LINMAX 10
 #define COLMAX 50
 
-FILE* arqEntrada;
 char word[LINMAX][COLMAX];
 
 /*================================= PROTOTIPOS ========================================*/
@@ -17,8 +18,13 @@ void parserCommandShell(char *line);
 int main() {
 	int status = 1;
 	char* line;
-	printf("\n--------------------- SHELL EP2 ---------------------\n\n");
+	printf("\n--------------------- SHELL EP3 ---------------------\n\n");
 
+	inicializaArquivoBinario("/tmp/unidade");
+	escreveArquivoBinario("/tmp/unidade", 1, 0, 10);
+	escreveArquivoBinario("/tmp/unidade", 2, 10, 10);
+	imprimeArquivoBinario("/tmp/unidade");
+	printf("\n");
 	while (status) {
 		line = readline("[ep3]: ");
 		limpaMatriz();
@@ -32,11 +38,18 @@ int main() {
 	return 0;
 }
 
+
 int interpretaComandosShell() {
-	int aux, i;
-	
 	if (strcmp(word[0], "mount") == 0) {
+		arquivo = fopen(word[1], "wb");
+
 		printf("Farei o mount do %s\n", word[1]);
+		if(arquivo){
+			leFileSystem();
+		}	
+		else{
+			criaFileSystem();
+		}
 	}
 
 	else if (strcmp(word[0], "cp") == 0) {
