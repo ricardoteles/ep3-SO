@@ -1,42 +1,78 @@
-#include "fs.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include "fs.h"
 
-static FILE* arquivo;
+static FILE* arquivo = NULL;
 
-void escreveArquivoBinario(char* fname, char valor, int inicio, int nbytes) {
-	int i;
-	char myVal = valor;
+static int criaFS(char* fname); 
+static int existeFS(char* fname);
 
-	arquivo = fopen(fname, "r+b");  //o arquivo tem que existir!
-	fseek(arquivo, inicio * sizeof(char), SEEK_SET);
+void escreveFS(char valor, int inicio, int nbytes) {
+	if (arquivo) {
+		int i;
+		char myVal = valor;
+		//arquivo = fopen(fname, "r+b");
+		fseek(arquivo, inicio * sizeof(char), SEEK_SET);
 
-	for (i = 0; i < nbytes; i++)
-		if (fwrite (&myVal, sizeof(char), 1, arquivo) != 1)
-			printf("Não escrebeu 1 byte!\n");
-
-	fclose(arquivo);
+		for (i = 0; i < nbytes; i++)
+			if (fwrite (&myVal, sizeof(char), 1, arquivo) != 1)
+				printf("Não escrebeu 1 byte!\n");
+		//fclose(arquivo);
+	}
 }
 
-void imprimeArquivoBinario(char* fname) {
-	char val;
-	arquivo = fopen(fname, "rb");
+void imprimeFS() {
+	if (arquivo) {
+		char val;
+		//arquivo = fopen(fname, "rb");
 
-	while (!feof(arquivo)) {
-		if (fread(&val, sizeof(char), 1, arquivo) == 1) {
-			printf("%d ", val);
+		while (!feof(arquivo)) {
+			if (fread(&val, sizeof(char), 1, arquivo) == 1) {
+				printf("%d", val);
+			}
 		}
+		//fclose(arquivo);
+	}
+}
+
+int mountFS(char* fname) {
+	// se o arquivo não foi aberto ainda
+	if (!arquivo) {
+		// se o arquivo não foi criado ainda
+		if (!existeFS(fname)) {
+			if (!criaFS(fname)) { // criar pode dar errado se caminho for incoerente	
+				return 0;
+			}
+		}
+
+		arquivo = fopen(fname, "r+b");
+		if (arquivo)
+			return 1;
+	}
+
+	return 0;
+}
+
+
+static int existeFS(char* fname) {
+	// r+b eh modo que obriga existencia do arquivo binario
+	arquivo = fopen(fname, "r+b");
+
+	if (!arquivo) { // se NULL é porque não existe
+		return 0;
 	}
 
 	fclose(arquivo);
+	return 1;
 }
 
-FILE* existeFS(char* fname){
-	arquivo = fopen(fname, "r+b");	
-
-	return arquivo;
-}
-
-void inicializaArquivoBinario(char* fname) {
+static int criaFS(char* fname) {
 	arquivo = fopen(fname, "wb");
-	fclose(arquivo);
+
+	// ve se criou
+	if (arquivo) {
+		fclose(arquivo);
+		return 1;
+	}
+	return 0;
 }

@@ -9,27 +9,22 @@
 #define COLMAX 50
 
 char word[LINMAX][COLMAX];
+int continua = 1;
 
 /*================================= PROTOTIPOS ========================================*/
-int interpretaComandosShell();
+void interpretaComandosShell();
 void limpaMatriz();
 void parserCommandShell(char *line);
 
 int main() {
-	int status = 1;
 	char* line;
 	printf("\n--------------------- SHELL EP3 ---------------------\n\n");
 
-	inicializaArquivoBinario("/tmp/unidade");
-	escreveArquivoBinario("/tmp/unidade", 1, 0, 10);
-	escreveArquivoBinario("/tmp/unidade", 2, 10, 10);
-	imprimeArquivoBinario("/tmp/unidade");
-	printf("\n");
-	while (status) {
+	while (continua) {
 		line = readline("[ep3]: ");
 		limpaMatriz();
 		parserCommandShell(line);
-		status = interpretaComandosShell();
+		interpretaComandosShell();
 
 		if (word[0][0] != '\0')
 			add_history (line);
@@ -38,45 +33,57 @@ int main() {
 	return 0;
 }
 
-
-int interpretaComandosShell() {
+void interpretaComandosShell() {
 	if (strcmp(word[0], "mount") == 0) {
-		arquivo = fopen(word[1], "wb");
+		if (word[1][0] != '\0') {
+			if (mountFS(word[1]))
+				printf("Unidade %s montada com sucesso!\n", word[1]);
 
-		printf("Farei o mount do %s\n", word[1]);
-		if(arquivo){
-			leFileSystem();
-		}	
-		else{
-			criaFileSystem();
+			else printf("Falha na montagem de %s\n", word[1]);
 		}
 	}
 
 	else if (strcmp(word[0], "cp") == 0) {
-		printf("Copiarei o arquivo %s para %s\n", word[1], word[2]);
+		if (word[1][0] != '\0' && word[2][0] != '\0') {
+			printf("cp %s %s\n", word[1], word[2]);
+		}
 	}
 
 	else if (strcmp(word[0], "mkdir") == 0) {
-		printf("Criarei a pasta %s\n", word[1]);
+		if (word[1][0] != '\0') {
+			printf("mkdir %s\n", word[1]);
+		}
 	}
 
 	else if (strcmp(word[0], "rmdir") == 0) {
-		printf("Removerei a pasta %s\n", word[1]);	
+		if (word[1][0] != '\0') {
+			printf("rmdir %s\n", word[1]);
+		}
 	}
 	else if (strcmp(word[0], "cat") == 0) {
-		printf("Farei o cat do arquivo %s\n", word[1]);	
+		if (word[1][0] != '\0') {
+			printf("cat %s\n", word[1]);
+		}		
 	}
 	else if (strcmp(word[0], "touch") == 0) {
-		printf("Farei o touch do arquivo %s\n", word[1]);	
+		if (word[1][0] != '\0') {
+			printf("touch %s\n", word[1]);
+		}
 	}
 	else if (strcmp(word[0], "rm") == 0) {
-		printf("Removerei o arquivo %s\n", word[1]);	
+		if (word[1][0] != '\0') {
+			printf("rm %s\n", word[1]);
+		}
 	}
 	else if (strcmp(word[0], "ls") == 0) {
-		printf("Farei o ls do diretorio %s\n", word[1]);	
+		if (word[1][0] != '\0') {
+			printf("ls %s\n", word[1]);
+		}
 	}
 	else if (strcmp(word[0], "find") == 0) {
-		printf("Farei o find do arquivo %s no diretorio %s\n", word[2], word[1]);	
+		if (word[1][0] != '\0' && word[2][0] != '\0') {
+			printf("find %s %s\n", word[1], word[2]);
+		}
 	}
 	else if (strcmp(word[0], "df") == 0) {
 		printf("Farei o df\n");	
@@ -85,14 +92,11 @@ int interpretaComandosShell() {
 		printf("Farei o umount\n");	
 	}
 	else if (strcmp(word[0], "sai") == 0) {
-		return 0;		
+		continua = 0;		
 	}
-	
 	else if (word[0][0] != '\0'){
 		fprintf(stderr, "comando %s inválido!\n", word[0]);
 	}
-
-	return 1;
 }
 
 void limpaMatriz() {
