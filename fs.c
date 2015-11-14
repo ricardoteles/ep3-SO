@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "fs.h"
 
+#define INICIO_GERESPLIV 	10
+#define INICIO_FAT			20
+
 static FILE* arquivo = NULL;
 
 static int criaFS(char* fname); 
@@ -39,20 +42,20 @@ int mountFS(char* fname) {
 	// se o arquivo não foi aberto ainda
 	if (!arquivo) {
 		// se o arquivo não foi criado ainda
-		if (!existeFS(fname)) {
-			if (!criaFS(fname)) { // criar pode dar errado se caminho for incoerente	
-				return 0;
-			}
+		if (!existeFS(fname) && !criaFS(fname)) { // criar pode dar errado se caminho for incoerente	
+			return 0;
 		}
 
 		arquivo = fopen(fname, "r+b");
-		if (arquivo)
+		if (arquivo) {
+			imprimeFS();
+			printf("\n");
 			return 1;
+		}
 	}
 
 	return 0;
 }
-
 
 static int existeFS(char* fname) {
 	// r+b eh modo que obriga existencia do arquivo binario
@@ -71,7 +74,12 @@ static int criaFS(char* fname) {
 
 	// ve se criou
 	if (arquivo) {
+		escreveFS(3,0,10);						// escreve superbloco
+		escreveFS(0,INICIO_GERESPLIV,10);		// escreve gerenciamentoEspacoLivre
+		escreveFS(2,INICIO_FAT,10);			// escreve FAT
+
 		fclose(arquivo);
+
 		return 1;
 	}
 	return 0;
