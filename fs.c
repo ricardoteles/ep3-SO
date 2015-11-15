@@ -2,8 +2,20 @@
 #include <stdlib.h>
 #include "fs.h"
 
-#define INICIO_GERESPLIV 	10
-#define INICIO_FAT			20
+#define TAM_FS				262144		/* tamanho do FS em bytes (= 256KB) */
+#define TAM_BLOCO			  4096		/* tamanho do bloco em bytes (= 4KB) */
+
+#define INICIO_SUPERBLOCO 		0
+#define TAM_SUPERBLOCO 			TAM_BLOCO
+
+#define INICIO_BITMAP 			TAM_BLOCO
+#define TAM_BITMAP 				TAM_BLOCO
+
+#define INICIO_FAT				2*TAM_BLOCO
+#define TAM_FAT					TAM_BLOCO
+
+#define INICIO_DADOS			3*TAM_BLOCO
+#define TAM_DADOS				61*TAM_BLOCO
 
 static FILE* arquivo = NULL;
 
@@ -14,27 +26,24 @@ void escreveFS(char valor, int inicio, int nbytes) {
 	if (arquivo) {
 		int i;
 		char myVal = valor;
-		//arquivo = fopen(fname, "r+b");
+
 		fseek(arquivo, inicio * sizeof(char), SEEK_SET);
 
 		for (i = 0; i < nbytes; i++)
 			if (fwrite (&myVal, sizeof(char), 1, arquivo) != 1)
 				printf("Não escrebeu 1 byte!\n");
-		//fclose(arquivo);
 	}
 }
 
 void imprimeFS() {
 	if (arquivo) {
 		char val;
-		//arquivo = fopen(fname, "rb");
 
 		while (!feof(arquivo)) {
 			if (fread(&val, sizeof(char), 1, arquivo) == 1) {
 				printf("%d", val);
 			}
 		}
-		//fclose(arquivo);
 	}
 }
 
@@ -48,7 +57,6 @@ int mountFS(char* fname) {
 
 		arquivo = fopen(fname, "r+b");
 		if (arquivo) {
-			imprimeFS();
 			printf("\n");
 			return 1;
 		}
@@ -74,10 +82,11 @@ static int criaFS(char* fname) {
 
 	// ve se criou
 	if (arquivo) {
-		escreveFS(3,0,10);						// escreve superbloco
-		escreveFS(0,INICIO_GERESPLIV,10);		// escreve gerenciamentoEspacoLivre
-		escreveFS(2,INICIO_FAT,10);			// escreve FAT
-
+		escreveFS(9, INICIO_SUPERBLOCO, TAM_SUPERBLOCO);			// escreve superbloco
+		escreveFS(0, INICIO_BITMAP, TAM_BITMAP);					// escreve bitmap
+		escreveFS(-2, INICIO_FAT, TAM_FAT);							// escreve FAT
+		escreveFS(3, INICIO_DADOS, TAM_DADOS);						// escreve FAT
+		
 		fclose(arquivo);
 
 		return 1;
