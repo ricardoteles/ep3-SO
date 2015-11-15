@@ -2,7 +2,8 @@
 #define FS_H
 
 void imprimeFS();
-void escreveFS(char valor, int inicio, int nbytes);
+void escreveInt(int valor, int inicioBytes, int nbytes);
+void escreveChar(char valor, int inicioBytes, int nbytes);
 int mountFS(char* fname);
 
 #endif

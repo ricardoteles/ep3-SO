@@ -1,12 +1,27 @@
+----------
 SUPERBLOCO
+----------
 
 - criar o número mágico
 
-
+-----------------------------------
 SISTEMA DE ARQUIVO (25x1024 blocos)
+-----------------------------------
 
 - reservar 1 bloco de 4kB para o superbloco
 - reservar 1 bloco de 4KB para o bitmap		(32 mil bits)
 - reserva o restante para FAT e para a regiao dos dados
 
- 
+-------
+LEIAME
+-------
+
+- fazer o leiame
+
+-------
+REMOVER
+-------
+
+- o converte.c do Makefile
+
+
