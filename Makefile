@@ -2,10 +2,12 @@ cc = gcc
 cflags = -Wall
 dflags = -g
 
-objs = ep3.o fs.o
+headers = fs.h superbloco.h bitmap.h fat.h dados.h
+objs = ep3.o fs.o superbloco.o bitmap.o fat.o dados.o
 exec = ep3 converte
 
 all: ep3 converte
+	-rm -f *.h.gch
 
 ep3: $(objs) -lreadline
 	$(cc) -o $@ $^
@@ -17,4 +19,4 @@ converte: converte.o
 	$(cc) -c $(dflags) $(cflags) $^
 
 clean:
-	-rm -f $(exec) $(objs) $(exec) *~core*
+	-rm -f $(exec) $(objs) $(exec) *~core* /tmp/unidade*
