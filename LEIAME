@@ -1,0 +1,57 @@
+Aluno: Fábio Eduardo Kaspar					NºUSP: 7991166
+Aluno: Ricardo Oliveira Teles				NºUSP: 7991444
+
+
+										LEIAME
+=======================================================================================================
+
+
+/*******************************************/
+/*    Como compilar e executar o ep3?   */
+/*******************************************/
+
+
+1) Esse ep foi feito na linguagem C. Para compilar e rodar o ep3 na plataforma Linux, é necessário ter o pacote libreadline-dev (no Debian) já instalado, já que o programa usa as funcionalidades das bibliotecas GNU readline e GNU history (Mais informações podem ser vistas na documentação da biblioteca em ftp://ftp.gnu.org/pub/gnu/readline/).
+
+
+2) Com a instalação do pacote já feita, basta abrir o terminal e digitar:
+
+$ make 
+$ ./ep3   
+
+
+/***************************************************/
+/*    Quais comandos são aceitos pelo Shell EP3?   */
+/***************************************************/
+
+O shell aceita os seguintes comandos (sem as aspas):
+
+-> "mount <arquivo>": monta o sistema de arquivos simulado que está no arquivo <arquivo>.
+
+-> "cp <origem> <destino>": cria dentro do sistema de arquivos simulado uma cópia, chamado <destino>, do arquivo <origem> que está em algum sistema de arquivos real dentro do seu computador.
+
+-> "mkdir <diretorio>": cria o diretorio <diretorio>.
+
+-> "rmdir <diretorio>": apaga o diretório <diretorio>.
+
+-> "cat <arquivo>": mostra o conteúdo do arquivo <arquivo> na tela.
+
+-> "touch <arquivo>": se o arquivo arquivo existir, atualiza o instante de tempo de acesso para o
+instante de tempo atual. Se não existir, cria um arquivo vazio.
+
+-> "rm <arquivo>": remove o arquivo <arquivo>.
+
+-> "ls <diretorio>": lista os arquivos e diretórios que estejam “embaixo” do diretório <diretorio>.
+
+-> "find <diretorio> <arquivo>": busca a partir de <diretorio> se há algum arquivo com nome <arquivo>.
+
+-> "df": imprime na tela algumas informacoes do sistema de arquivos.
+
+-> "umount": desmonta o sistema de arquivos.
+
+-> "sai": sai do simulador.
+
+
+OBS: Outras informacoes julgadas importantes, tais como a estrutura do sistema de arquivo e decisões de projeto, encontram-se no "apresentacao.pdf".
+
+=======================================================================================================

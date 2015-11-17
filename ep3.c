@@ -11,10 +11,23 @@
 char word[LINMAX][COLMAX];
 int continua = 1;
 
+int qtdadeDiretorios = 0;
+int qtdadeArquivos = 0;
+int espacoLivre = 1600;
+int espacoDesperdicado = 0;
+
 /*================================= PROTOTIPOS ========================================*/
 void interpretaComandosShell();
 void limpaMatriz();
 void parserCommandShell(char *line);
+
+void imprimeFAT(int quantidadeBlocos){
+	int i;
+
+	for(i = 0; i < quantidadeBlocos; i++){
+		printf("%d ", FAT[i]);
+	}
+}
 
 int main() {
 	char* line;
@@ -86,10 +99,14 @@ void interpretaComandosShell() {
 		}
 	}
 	else if (strcmp(word[0], "df") == 0) {
-		printf("Farei o df\n");	
+		printf("\nQuantidade de diretorios: %d\n", qtdadeDiretorios);	
+		printf("Quantidade de arquivos:   %d\n", qtdadeArquivos);	
+		printf("Espaco livre:             %d\n", espacoLivre);	
+		printf("Espaco desperdicado:      %d\n\n", espacoDesperdicado);	
 	}
 	else if (strcmp(word[0], "umount") == 0) {
-		printf("Farei o umount\n");	
+		umountFS();	
+		printf("Unidade desmontada com sucesso!\n");
 	}
 	else if (strcmp(word[0], "sai") == 0) {
 		continua = 0;		

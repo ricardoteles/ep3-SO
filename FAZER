@@ -3,6 +3,7 @@ SUPERBLOCO
 ----------
 
 - criar o número mágico
+- colocar blocos usados, memoria desperdicada, atributos do diretorio raiz, qtdadeDiretorios, qtdadeArquivos, espacoLivre, espacoDesperdicado
 
 -----------------------------------
 SISTEMA DE ARQUIVO (25x1024 blocos)
@@ -18,11 +19,10 @@ LEIAME
 
 - fazer o leiame (colocar as decisoes tomadas no FS)
 - escrever as dependencias
+- verificar se o nome do arquivo em pdf é apresentacao.pdf
 
 -------
 REMOVER
 -------
 
-- o converte.c do Makefile
-
-
+- o converte.c e o converte.o do Makefile

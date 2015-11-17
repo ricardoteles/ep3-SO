@@ -1,13 +1,11 @@
 #include "fs.h"
 #include "fat.h"
 
-int FAT[1000];
-
 void criaFAT() {
-	escreveInt(-2, 2*TAM_BLOCO, 4*TAM_BLOCO);				// inicializa o FAT com -2
+	escreveInt(-2, iniFat, iniRaiz-iniFat);				// inicializa o FAT com -2
 }
 
-void iniciaFATnaMemoria(int inicioBytes, int quantidadeBlocos){
+void carregaFATnaMemoria(int inicioBytes, int qtdeBlocosDados) {
 	int i;
 
 	if (arquivoMount) {
@@ -15,7 +13,7 @@ void iniciaFATnaMemoria(int inicioBytes, int quantidadeBlocos){
 
 		fseek(arquivoMount, inicioBytes, SEEK_SET);
 
-		for (i = 0; i < quantidadeBlocos; i++) {
+		for (i = 0; i < qtdeBlocosDados; i++) {
 			if (fread(&val, sizeof(char), 4, arquivoMount) == 4) {
 				FAT[i] = val;
 			}
@@ -23,7 +21,7 @@ void iniciaFATnaMemoria(int inicioBytes, int quantidadeBlocos){
 	}
 }
 
-void escreveFATnoDisco(int valor, int inicioBytes, int nbytes) {
+void regravaFATnoDisco(int inicioBytes, int nbytes) {
 	if (arquivoMount) {
 		int i;
 

@@ -2,5 +2,5 @@
 #include "bitmap.h"
 
 void criaBitMap() {
-	escreveChar(0, TAM_BLOCO, TAM_BLOCO);					// inicializa mapa de bits com 0
+	escreveChar(0, iniBitmap, iniFat-iniBitmap);					// inicializa mapa de bits com 0
 }
