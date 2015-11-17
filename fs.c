@@ -33,11 +33,11 @@ int mountFS(char* fname) {
 }
 
 static void carregaFS() {
-	qtadeBlocos = leInt(iniSuperbloco);				// le numero de blocos
-	iniBitmap   = leInt(iniSuperbloco + 4); 		// le inicio bitmap
-	iniFat      = leInt(iniSuperbloco + 8);		 	// le inicio FAT
-	iniRaiz     = leInt(iniSuperbloco + 12);		// le inicio Raiz
-	iniDados    = leInt(iniSuperbloco + 16);		// le inicio Dados
+	qtadeBlocos = leInt(iniSuperbloco);				// le numero de blocos do superbloco
+	iniBitmap   = leInt(iniSuperbloco + 4); 		// le inicio bitmap do superbloco
+	iniFat      = leInt(iniSuperbloco + 8);		 	// le inicio FAT do superbloco
+	iniRaiz     = leInt(iniSuperbloco + 12);		// le inicio Raiz do superbloco
+	iniDados    = leInt(iniSuperbloco + 16);		// le inicio Dados do superbloco
 
 	carregaFATnaMemoria(iniFat, TAM_FAT);
 
