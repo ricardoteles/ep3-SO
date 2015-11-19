@@ -9,6 +9,7 @@
 #define COLMAX 50
 
 char word[LINMAX][COLMAX];
+
 int continua = 1;
 
 int qtdadeDiretorios = 0;
@@ -28,6 +29,7 @@ int main() {
 	while (continua) {
 		line = readline("[ep3]: ");
 		limpaMatriz();
+
 		parserCommandShell(line);
 		interpretaComandosShell();
 
@@ -56,7 +58,8 @@ void interpretaComandosShell() {
 
 	else if (strcmp(word[0], "mkdir") == 0) {
 		if (word[1][0] != '\0') {
-			printf("mkdir %s\n", word[1]);
+			mkdir(word[1]);
+			printf("mkdir %s foi realizado com sucesso\n", word[1]);
 		}
 	}
 
@@ -82,7 +85,11 @@ void interpretaComandosShell() {
 	}
 	else if (strcmp(word[0], "ls") == 0) {
 		if (word[1][0] != '\0') {
-			printf("ls %s\n", word[1]);
+			printf("\n---------------------------------------------------------------\n");
+			printf("nome			  tempoModificacao	      tamanho\n");
+			printf("---------------------------------------------------------------\n");
+			// ls(word[1], 23213, 4096);
+			printf("\n");
 		}
 	}
 	else if (strcmp(word[0], "find") == 0) {

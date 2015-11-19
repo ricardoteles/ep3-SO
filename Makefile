@@ -2,8 +2,8 @@ cc = gcc
 cflags = -Wall
 dflags = -g
 
-headers = fs.h dados.h binario.h
-objs = ep3.o fs.o dados.o binario.o
+headers = fs.h dados.h binario.h path.h
+objs = ep3.o fs.o dados.o binario.o path.o
 exec = ep3 converte
 
 all: ep3 converte

@@ -9,13 +9,11 @@
 
 #define TAM_FS				     16000		
 #define TAM_BLOCO			  	 160		
-#define NUM_BLOCOS				 (TAM_FS/TAM_BLOCO) 
 #define TAM_FAT					 4*TAM_BLOCO
 
 FILE* arquivo;
 
 int umountFS();
 int mountFS(char* fname);
-
 
 #endif

@@ -26,7 +26,6 @@ void escreveChar(FILE* bin, char valor, int inicioBytes, int nChar) {
 	}
 }
 
-
 void escreveStruct(FILE* bin, Arquivo valor, int inicioBytes, int nStruct) {
 	if (bin) {
 		int i;
@@ -67,7 +66,6 @@ char leChar(FILE* bin, int inicioBytes) {
 	
 	return 0;
 }
-
 
 Arquivo leStruct(FILE* bin, int inicioBytes) {
 	Arquivo val;

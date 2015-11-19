@@ -11,14 +11,13 @@ static int qtadeBlocos;
 static int iniSuperbloco;
 static int iniBitmap;
 static int iniFat;
-static int iniRaiz;
-//static int iniDados;
+// static int iniRaiz;
 static int changeFAT;
 
 int umountFS() {
 	if (arquivo != NULL) {
-		if (changeFAT)
-			regravaFATnoDisco(iniFat, iniRaiz-iniFat);
+		// if (changeFAT)
+		regravaFATnoDisco(iniFat, 160);
 		
 		fclose(arquivo);
 		arquivo = NULL;
@@ -47,17 +46,18 @@ int mountFS(char* fname) {
 }
 
 static void carregaFS() {
+	Arquivo arq;
+
 	iniSuperbloco = 0;
 	qtadeBlocos = leInt(arquivo, iniSuperbloco);			// le numero de blocos do superbloco
-	iniBitmap   = leInt(arquivo, iniSuperbloco + 4); 		// le inicio bitmap do superbloco
-	iniFat      = leInt(arquivo, iniSuperbloco + 8);		// le inicio FAT do superbloco
-	iniRaiz     = leInt(arquivo, iniSuperbloco + 12);		// le inicio Raiz do superbloco
-	//iniDados    = leInt(arquivo, iniSuperbloco + 16);		// le inicio Dados do superbloco
+	iniBitmap   = leInt(arquivo, iniSuperbloco + 12); 		// le inicio bitmap do superbloco
+	iniFat      = leInt(arquivo, iniSuperbloco + 16);		// le inicio FAT do superbloco
+	arq         = leStruct(arquivo, iniSuperbloco + 20);		// le inicio Raiz do superbloco
 
 	carregaFATnaMemoria(iniFat, TAM_FAT);
 
 	printf("Carreguei os dados:\n");
-	printf("%d %d %d %d\n", qtadeBlocos, iniBitmap, iniFat, iniRaiz);
+	printf("%d %d %d %d\n", qtadeBlocos, iniBitmap, iniFat, arq.byteInicio);
 }
 
 
