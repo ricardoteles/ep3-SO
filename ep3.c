@@ -21,14 +21,6 @@ void interpretaComandosShell();
 void limpaMatriz();
 void parserCommandShell(char *line);
 
-void imprimeFAT(int quantidadeBlocos){
-	int i;
-
-	for(i = 0; i < quantidadeBlocos; i++){
-		printf("%d ", FAT[i]);
-	}
-}
-
 int main() {
 	char* line;
 	printf("\n--------------------- SHELL EP3 ---------------------\n\n");
@@ -105,8 +97,10 @@ void interpretaComandosShell() {
 		printf("Espaco desperdicado:      %d\n\n", espacoDesperdicado);	
 	}
 	else if (strcmp(word[0], "umount") == 0) {
-		umountFS();	
-		printf("Unidade desmontada com sucesso!\n");
+		if (umountFS())	
+			printf("Unidade desmontada com sucesso!\n");
+
+		else printf("Não existe unidade montada!\n");
 	}
 	else if (strcmp(word[0], "sai") == 0) {
 		continua = 0;		

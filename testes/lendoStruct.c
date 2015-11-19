@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-FILE* arquivoMount;
+FILE* arquivo;
 
 typedef struct arquivo {
 	int enderecoInicio;
@@ -13,25 +13,25 @@ typedef struct arquivo {
 } Arquivo; 
 
 void escreveDiretorio(Arquivo arq, int inicioBytes, int nbytes) {
-		if (arquivoMount) {
+		if (arquivo) {
 		int i;
 		Arquivo myVal = arq;
 
-		fseek(arquivoMount, inicioBytes, SEEK_SET);
+		fseek(arquivo, inicioBytes, SEEK_SET);
 
 		for (i = 0; i < nbytes; i++)
-			if (fwrite (&myVal, sizeof(Arquivo), 1, arquivoMount) != 1)
+			if (fwrite (&myVal, sizeof(Arquivo), 1, arquivo) != 1)
 				printf("Não escreveu 1 Arquivo!\n");
 	}
 }
 
 Arquivo* leDiretorio(int inicioBytes) {
-	if (arquivoMount) {
+	if (arquivo) {
 		Arquivo val;
 
-		fseek(arquivoMount, inicioBytes, SEEK_SET);
+		fseek(arquivo, inicioBytes, SEEK_SET);
 
-		if (fread(&val, sizeof(Arquivo), 1, arquivoMount) == 1) {
+		if (fread(&val, sizeof(Arquivo), 1, arquivo) == 1) {
 			return &val;
 		}
 	}
@@ -52,7 +52,7 @@ void criaDiretorio(Arquivo arq) {
 }
 
 int main(int argc, char* argv[]){
-	arquivoMount = fopen(argv[1], "r+b");
+	arquivo = fopen(argv[1], "r+b");
 	Arquivo arq;
 	Arquivo* arqSaida;
 
