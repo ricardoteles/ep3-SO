@@ -24,13 +24,26 @@ void regravaFATnoDisco(int inicioBytes, int nbytes);
 void imprimeFAT(int quantidadeBlocos);
 
 /*************** DADOS ******************/
-void criaRaiz(); 
+void escreveRaizEmDisco(); 
 void alocaDiretorio(int byteInicio);
-int alocaEntradaArquivo(char* nomeDir);
 Arquivo setStruct(char* nome, int byteInicio, int tempoCriado, 
 				  int tempoAcessado, int tempoModificado, int tamanho); 
-void mkdir(char* nomeDir);
 
+int mkdir(char* nomeDir);
 void ls(char* nome, int tempoModificado, int tamanho);
+
+/*********************** ARVORE ************************/
+void percorreArvoreFS(char* path);
+
+int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco);
+int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai);
+int insereEntradaPorBloco(Arquivo entrada, int endInicioBloco);
+int insereEntradaEmDiretorio(Arquivo entrada);
+
+int posLivreBitmap(int inicioBusca);
+void expandeFAT(int posicaoInicio, int novaPos);
+int mapeiaBitmapEmByte(int posBitmap);
+int mapsBlockToFAT(int endBloco);
+int mapsFATtoBlock(int endFAT);
 
 #endif

@@ -3,17 +3,6 @@
 #include "dados.h"
 #include "binario.h"
 
-static void criaFS(char* fname); 
-static int existeFS(char* fname);
-static void carregaFS();
-
-static int qtadeBlocos;
-static int iniSuperbloco;
-static int iniBitmap;
-static int iniFat;
-// static int iniRaiz;
-static int changeFAT;
-
 int umountFS() {
 	if (arquivo != NULL) {
 		// if (changeFAT)
@@ -45,23 +34,25 @@ int mountFS(char* fname) {
 	return 0;
 }
 
-static void carregaFS() {
-	Arquivo arq;
-
+void carregaFS() {
 	iniSuperbloco = 0;
-	qtadeBlocos = leInt(arquivo, iniSuperbloco);			// le numero de blocos do superbloco
-	iniBitmap   = leInt(arquivo, iniSuperbloco + 12); 		// le inicio bitmap do superbloco
-	iniFat      = leInt(arquivo, iniSuperbloco + 16);		// le inicio FAT do superbloco
-	arq         = leStruct(arquivo, iniSuperbloco + 20);		// le inicio Raiz do superbloco
+
+	qtadeBlocos 	  = leInt(arquivo, 0);			// le #blocos totais
+    qtadeBlocosLivres = leInt(arquivo, 4); 			// le #blocos livres
+	memUsada 		  = leInt(arquivo, 8);			// le memoria utilizada
+	iniBitmap   	  = leInt(arquivo, 12); 		// le inicio bitmap do superbloco
+	iniFat      	  = leInt(arquivo, 16);			// le inicio FAT do superbloco
+	raiz        	  = leStruct(arquivo, 20);		// le Raiz do superbloco
 
 	carregaFATnaMemoria(iniFat, TAM_FAT);
 
 	printf("Carreguei os dados:\n");
-	printf("%d %d %d %d\n", qtadeBlocos, iniBitmap, iniFat, arq.byteInicio);
+	printf("#blocos: %d\n #blocos livre: %d\n Bitmap: %d\n FAT: %d\n Raiz: %d\n", 
+		qtadeBlocos, qtadeBlocosLivres, iniBitmap, iniFat, raiz.byteInicio);
 }
 
 
-static int existeFS(char* fname) {
+int existeFS(char* fname) {
 	// r+b eh modo que obriga existencia do arquivo binario
 	arquivo = fopen(fname, "r+b");
 
@@ -73,16 +64,17 @@ static int existeFS(char* fname) {
 	return 1;
 }
 
-static void criaFS(char* fname) {
+void criaFS(char* fname) {
 	arquivo = fopen(fname, "wb");
 
 	// ve se criou
 	if (arquivo) {
-		criaSuperBloco(arquivo);
-		criaBitMap(arquivo);
-		criaFAT(arquivo);
-		criaRaiz();
+		criaSuperBloco();
+		criaBitMap();
+		criaFAT();
+		escreveRaizEmDisco();
 
 		fclose(arquivo);
 	}
 }
+

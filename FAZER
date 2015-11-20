@@ -5,6 +5,8 @@ SUPERBLOCO
 - criar o número mágico
 - colocar blocos usados, memoria desperdicada, atributos do diretorio raiz, qtdadeDiretorios, qtdadeArquivos, espacoLivre, espacoDesperdicado
 
+- regravar superbloco no disco após a simulaçao
+
 ----------
 MKDIR
 ----------
