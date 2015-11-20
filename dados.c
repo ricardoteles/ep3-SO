@@ -6,9 +6,10 @@
 
 #define MAX_NIVEIS 100
 
-static int addressBlock[MAX_NIVEIS];
-static int numNiveis;
+int addressBlock[MAX_NIVEIS];
+int numNiveis;
 
+void imprimeDiretorio(int inicioBytes);
 
 Arquivo setStruct(char* nome, int byteInicio, int tempoCriado,
 			 	   int tempoAcessado, int tempoModificado, int tamanho) 
@@ -34,7 +35,7 @@ void criaSuperBloco() {
 
 	raiz = setStruct("/\0", (int)(2 * TAM_BLOCO + TAM_FAT), 0, 0, 0, -1);
 	
-	//escreveInt(arquivo, 0, 0, TAM_BLOCO);	// preenche com zero				  
+	escreveInt(arquivo, 0, 0, TAM_BLOCO);	// preenche com zero				  
 	
 	escreveInt(arquivo, qtadeBlocos,  0,  	1);		// escreve numero de blocos totais
 	escreveInt(arquivo, qtadeBlocosLivres,  4 ,  1);		// escreve # blocos livres
@@ -97,11 +98,31 @@ void escreveRaizEmDisco() {
 	escreveChar(arquivo, '\0', raiz.byteInicio+4, TAM_BLOCO-4);
 }
 
+// pra 1 bloco!
+void imprimeDiretorio(int inicioBytes) {
+	Arquivo entrada;
+	int i;
+
+	for (i = inicioBytes+4; i < inicioBytes + TAM_BLOCO; ) {
+		if (leChar(arquivo, i) != '\0')
+			i++;
+		else {
+			entrada = leStruct(arquivo, i);
+			i += sizeof(Arquivo);
+
+			printf("Nome: %s|\n", entrada.nome);
+			printf("Inicio byte: %d|\n", entrada.byteInicio);
+			printf("Tamanho: %d|x|\n\n", entrada.tamanho);
+		}
+	}
+}
+
 /**************** MKDIR ****************/ 
 
 int mkdir(char* path) {
 	Arquivo novo;
-	
+	int i;
+
 	numNiveis = parserPath(path);
 	percorreArvoreFS(path);
 
@@ -109,6 +130,10 @@ int mkdir(char* path) {
 
 	if (insereEntradaEmDiretorio(novo)) {
 		alocaDiretorio(novo.byteInicio);
+		
+		for (i = 0; i < numNiveis; i++)
+			imprimeDiretorio(addressBlock[i]);
+		
 		return 1;
 	}
 	return 0;
