@@ -6,8 +6,13 @@
 int umountFS() {
 	if (arquivo != NULL) {
 		// if (changeFAT)
-		regravaFATnoDisco(iniFat, 160);
-		
+		regravaFATnoDisco();
+		escreveInt(arquivo, qtadeBlocos, 0, 1);
+		escreveInt(arquivo, qtadeBlocosLivres, 4, 1);
+		escreveInt(arquivo, memUsada, 8, 1);
+		escreveInt(arquivo, iniBitmap, 12, 1);
+		escreveInt(arquivo, iniFat, 16, 1);
+		escreveStruct(arquivo, raiz, 20, 1);
 		fclose(arquivo);
 		arquivo = NULL;
 		return 1;
@@ -44,7 +49,7 @@ void carregaFS() {
 	iniFat      	  = leInt(arquivo, 16);			// le inicio FAT do superbloco
 	raiz        	  = leStruct(arquivo, 20);		// le Raiz do superbloco
 
-	carregaFATnaMemoria(iniFat, TAM_FAT);
+	carregaFATnaMemoria();
 
 	printf("Carreguei os dados:\n");
 	printf("#blocos: %d\n #blocos livre: %d\n Bitmap: %d\n FAT: %d\n Raiz: %d\n", 
@@ -72,7 +77,7 @@ void criaFS(char* fname) {
 		criaSuperBloco();
 		criaBitMap();
 		criaFAT();
-		escreveRaizEmDisco();
+		alocaDiretorio(iniFat + TAM_FAT);
 
 		fclose(arquivo);
 	}

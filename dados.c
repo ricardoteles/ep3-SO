@@ -8,9 +8,45 @@
 
 int addressBlock[MAX_NIVEIS];
 int numNiveis;
+const int totalArquivo = (TAM_BLOCO - 4)/(sizeof(Arquivo)); 
 
 void imprimeDiretorio(int inicioBytes);
 
+void listDirectory(int iniBytes) {
+ 	int i, pos;
+ 	//int numEntradaslivres, numArquivos;
+ 	int iniFAT = mapsBlockToFAT(iniBytes);
+ 	int myIniBytes;
+
+ 	do 
+ 	{
+ 		//pos = 4;
+ 		myIniBytes = mapsFATtoBlock(iniFAT);
+ 		//numEntradaslivres = leInt(arquivo, myIniBytes);
+ 		//numArquivos = totalArquivo - numEntradaslivres;
+	 	
+	 	//for(i = 0; i < numArquivos; ) {
+	 	for(pos = 4; pos < TAM_BLOCO;) {
+
+	 		if (leChar(arquivo, myIniBytes+pos) != '\0') {  
+		 		Arquivo saida = leStruct(arquivo, myIniBytes+pos);
+			 	
+			 	if(saida.tamanho == -1) {
+			 		printf("%-20s %-10d (DIR)\n", saida.nome, saida.tempoModificado);
+			 	}
+			 	else {
+			 		printf("%-20s %-10d %10d KB\n", saida.nome, saida.tempoModificado, saida.tamanho);
+			 	}
+		  		
+		  		i++;
+		  	}
+		 	pos += sizeof(Arquivo);
+	 	}
+	 	
+	 	iniFAT = FAT[iniFAT];
+
+ 	} while (iniFAT != -1);
+}
 
 Arquivo setStruct(char nome[20], int byteInicio, int tempoCriado,
 			 	   int tempoAcessado, int tempoModificado, int tamanho) 
@@ -34,7 +70,7 @@ void criaSuperBloco() {
 	iniBitmap = TAM_BLOCO;
 	iniFat = 2 * TAM_BLOCO; 
 
-	raiz = setStruct("/\0", (int)(2 * TAM_BLOCO + TAM_FAT), 0, 0, 0, -1);
+	raiz = setStruct("/\0", (int)(iniFat + TAM_FAT), 0, 0, 0, -1);
 	
 	escreveInt(arquivo, 0, 0, TAM_BLOCO);	// preenche com zero				  
 	
@@ -56,29 +92,29 @@ void criaFAT() {
 	escreveInt(arquivo, -2, iniFat+4, TAM_FAT-1);	// inicializa o FAT com -2
 }
 
-void carregaFATnaMemoria(int inicioBytes, int qtdeBlocosDados) {
+void carregaFATnaMemoria() {
 	int i;
 
 	if (arquivo) {
 		int val;
 
-		fseek(arquivo, inicioBytes, SEEK_SET);
+		fseek(arquivo, iniFat, SEEK_SET);
 
-		for (i = 0; i < qtdeBlocosDados; i++) {
-			if (fread(&val, sizeof(char), 4, arquivo) == 4) {
+		for (i = 0; i < TAM_FAT; i++) {
+			if (fread(&val, sizeof(int), 1, arquivo) == 1) {
 				FAT[i] = val;
 			}
 		}
 	}
 }
 
-void regravaFATnoDisco(int inicioBytes, int nbytes) {
+void regravaFATnoDisco() {
 	if (arquivo) {
 		int i;
 
-		fseek(arquivo, inicioBytes, SEEK_SET);
+		fseek(arquivo, iniFat, SEEK_SET);
 
-		for (i = 0; i < nbytes; i++)
+		for (i = 0; i < TAM_FAT; i++)
 			if (fwrite (&FAT[i], sizeof(int), 1, arquivo) != 1)
 				printf("Não escreveu 1 int!\n");
 	}
@@ -92,12 +128,6 @@ void imprimeFAT(int quantidadeBlocos) {
 	}
 }
 
-void escreveRaizEmDisco() {
-	int numEntradas = (TAM_BLOCO-4)/(sizeof(Arquivo));
-
-	escreveInt(arquivo, numEntradas, raiz.byteInicio, 1);
-	escreveChar(arquivo, '\0', raiz.byteInicio+4, TAM_BLOCO-4);
-}
 
 // pra 1 bloco!
 void imprimeDiretorio(int inicioBytes) {
@@ -118,36 +148,36 @@ void imprimeDiretorio(int inicioBytes) {
 	}
 }
 
-void ls(int iniBytes) {
- 	int i, pos = 4;
+/*********************************************** MKDIR ****************************************/ 
+void ls(char* path) {
+	int endFinal;
 
- 	int totalArquivo = (TAM_BLOCO - 4)/ sizeof(Arquivo); 
- 	int numEntradaslivres = leInt(arquivo, iniBytes);
-  
- 	int numArquivos = totalArquivo - numEntradaslivres;
+	if (strcmp("/\0", path) != 0) {
+		numNiveis = parserPath(path);
 
- 	for(i = 0; i < numArquivos; i++){  
- 		Arquivo saida = leStruct(arquivo, iniBytes+pos);
-  
-	 	if(saida.tamanho == -1) {
-	 		printf("%-20s %-10d (DIR)\n", saida.nome, saida.tempoModificado);
-	 	}
-	 	else {
-	 		printf("%-20s %-10d %10d KB\n", saida.nome, saida.tempoModificado, saida.tamanho);
-	 	}
-	  
-	 	pos += sizeof(Arquivo);
- 	}
+		percorreArvoreFS(path);
+
+		int endFatPai = mapsBlockToFAT(addressBlock[numNiveis-1]);
+		endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], endFatPai, addressBlock[numNiveis-1]);
+	}
+	else {
+		endFinal = raiz.byteInicio;
+	}	
+	
+	listDirectory(endFinal);
 }
-
-/**************** MKDIR ****************/ 
 
 int mkdir(char* path) {
 	char nome[20];
 	Arquivo novo;
-	int i;
-	
+	//int i;
+	int endEntry;
+
 	numNiveis = parserPath(path);
+
+	// for (i = 0; i < MAX_NIVEIS; i++)
+	// 	addressBlock[i] = 0;
+
 	// printf("Path:@");
 	// imprimePath(); 
 	
@@ -157,25 +187,20 @@ int mkdir(char* path) {
 
 	novo = setStruct(nome, 0, 10, 10, 10, -1); 
 
-	if (insereEntradaEmDiretorio(novo)) {
+	endEntry = insereEntradaEmDiretorio(&novo);
+
+	if (endEntry) {	
+		escreveStruct(arquivo, novo, endEntry, 1);
 		alocaDiretorio(novo.byteInicio);
-		
+
 		// teste
-		for (i = 0; i < numNiveis; i++)
-			imprimeDiretorio(addressBlock[i]);
-		////////////////
+	 	if (addressBlock[numNiveis-1] > 0)
+			listDirectory(addressBlock[numNiveis-1]);
 
 		return 1;
 	}
+
 	return 0;
-}
-
-// escreve bloco de dados do diretorio no FS
-void alocaDiretorio(int byteInicio) {
-	int numEntradas = (TAM_BLOCO-4)/(sizeof(Arquivo));
-
-	escreveInt(arquivo, numEntradas, byteInicio, 1);
-	escreveChar(arquivo, '\0', byteInicio+4, TAM_BLOCO-4);
 }
 
 int posLivreBitmap(int inicioBusca) {
@@ -191,15 +216,22 @@ int posLivreBitmap(int inicioBusca) {
 
 
 // monta a arvore em addressBlock
-void percorreArvoreFS(char* path) {
+void percorreArvoreFS() {
 	int i, endPai = 0;
 
 	endPai = addressBlock[0] = raiz.byteInicio; 
 	
 	for (i = 1; i < numNiveis; i++) {
-		endPai = buscaEntradaEmDiretorio(matrizPath[i-1], mapsBlockToFAT(endPai), endPai);
+		endPai = buscaEntradaEmDiretorio(matrizPath[i-1], mapsBlockToFAT(addressBlock[i-1]), 
+														  addressBlock[i-1]);
 		addressBlock[i] = endPai; // vai salvando o caminho
 	}
+
+	// printf("Endereços encontrados:\n");
+	// for (i = 0; i < numNiveis; i++) {
+	// 	printf("%d ", addressBlock[i]);
+	// }
+	// printf("|\n\n");
 }
 
 // busca por endereco da entrada no diretorio endInicioFAT, 
@@ -220,50 +252,41 @@ int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco)
 
 // retorna endereco do bloco de inicio da entrada ou -1 => pra montar a arvore :)
 int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai) {
-	//int NEntradas = leInt(arquivo, enderecoBlocoPai);
+	int numEntradasLivres = leInt(arquivo, enderecoBlocoPai);
 	int pos;
-	Arquivo arq;
+	int numEntradas = totalArquivo - numEntradasLivres; 
 
-	//if (NEntradas > 0) {
+	if (numEntradas > 0) {
 		// começa a busca da entrada depois do inteiro
 		for (pos = enderecoBlocoPai+4; pos < enderecoBlocoPai + TAM_BLOCO; ) {
-			if (leChar(arquivo, pos) == '\0') pos++;
+			if (leChar(arquivo, pos) == '\0') 
+				pos++;
+			
 			else { 
-				arq = leStruct(arquivo, pos);
+				Arquivo arq = leStruct(arquivo, pos);
 
-				if (strcmp(entrada, arq.nome) == 0)
+				if (strcmp(entrada, &arq.nome[0]) == 0) {
 					return arq.byteInicio;
-
-				else pos += sizeof(Arquivo);
+				}
+				else pos++;
 			}
 		} 
-	//}
+	}
 	return -1;
 }
 
-int mapsBlockToFAT(int endBloco) {
-	return (int)((endBloco - raiz.byteInicio)/TAM_BLOCO);
-}
-
-int mapsFATtoBlock(int endFAT) {
-	return (int)(raiz.byteInicio + endFAT * TAM_BLOCO);
-}
-
-int mapeiaBitmapEmByte(int posBitmap) {
-	return (int)(raiz.byteInicio + posBitmap * TAM_BLOCO);
-}
 
 // retorna o endereco do bloco da entrada onde deve inserir
-int insereEntradaPorBloco(Arquivo entrada, int endInicioBloco) {
+int insereEntradaPorBloco(int endInicioBloco) {
 	int pos;
 	int NEntradas = leInt(arquivo, endInicioBloco);
 
 	if (NEntradas > 0) {
 		for (pos = endInicioBloco+4; pos < endInicioBloco + TAM_BLOCO; ) {
 			if (leChar(arquivo, pos) == '\0') {
-				//escreveStruct(arquivo, entrada, pos, 1); // grava entrada no diretorio pai
+				// só decrementa entradas livres do bloco do pai
 				escreveInt(arquivo, NEntradas-1, endInicioBloco, 1); 
-				return pos;	
+				return pos;	// ja retorna
 			}
 			else pos += sizeof(Arquivo);
 		}
@@ -274,7 +297,7 @@ int insereEntradaPorBloco(Arquivo entrada, int endInicioBloco) {
 
 // insere a entrada em um bloco do diretorio e retorna 1 ou 0 se conseguiu ou nao
 // Tb guarda o endereco do bloco do novo diretorio
-int insereEntradaEmDiretorio(Arquivo entrada) {
+int insereEntradaEmDiretorio(Arquivo* entrada) {
 	int i, lastBlock, endInsert;
 
 	if (qtadeBlocosLivres > 1) 
@@ -283,7 +306,7 @@ int insereEntradaEmDiretorio(Arquivo entrada) {
 		for (i = mapsBlockToFAT(addressBlock[numNiveis-1]); i != -1; i = FAT[i]) 
 		{	
 			// tenta escrever a entrada em algum bloco do diretorio pai
-			endInsert = insereEntradaPorBloco(entrada, mapsFATtoBlock(i));
+			endInsert = insereEntradaPorBloco(mapsFATtoBlock(i));
 
 			if (endInsert) 
 			{		
@@ -293,10 +316,10 @@ int insereEntradaEmDiretorio(Arquivo entrada) {
 				escreveChar(arquivo, 1, iniBitmap + novoBloco, 1); // seta 1 no bitmap
 				FAT[novoBloco] = -1; // inicio do diretorio	
 
-				entrada.byteInicio = mapeiaBitmapEmByte(novoBloco);
-				escreveStruct(arquivo, entrada, endInsert, 1); // escreve entrada no diretorio
+				entrada->byteInicio = mapeiaBitmapEmByte(novoBloco);
+				//escreveStruct(arquivo, *entrada, endInsert, 1); // escreve entrada no diretorio
 
-				return 1;
+				return endInsert;
 			}
 			lastBlock = i;	
 		}
@@ -320,10 +343,10 @@ int insereEntradaEmDiretorio(Arquivo entrada) {
 			escreveChar(arquivo, 1, iniBitmap + novoBloco, 1); 
 			FAT[novoBloco] = -1; // primeiro bloco do diretorio
 
-			entrada.byteInicio = mapeiaBitmapEmByte(novoBloco);
-			escreveStruct(arquivo, entrada, endInsert+4, 1);
+			entrada->byteInicio = mapeiaBitmapEmByte(novoBloco);
+			//escreveStruct(arquivo, *entrada, endInsert+4, 1);
 
-			return 1;
+			return (endInsert+4);
 		}
 	}
 	return 0;
@@ -339,59 +362,20 @@ void expandeFAT(int posicaoInicio, int novaPos) {
 	FAT[novaPos] = -1;
 }
 
-
-/**************** LS ****************/ 
-
-// void ls(char* nome, int tempoModificado, int tamanho) {
-// 	if(tamanho == -1)
-// 		printf("%-20s    	%-10d    	      (DIR)\n", nome, tempoModificado);
-// 	else
-// 		printf("%-20s    	%-10d    	%10d KB\n", nome, tempoModificado, tamanho);
-// }
-/*
-int alocaArquivo(char* nomeDir) {
-	int entradasLivres = leInt(arquivo, iniRaiz);
-	int posPai = 0, posDir = 0;
-	Arquivo novoDir;
-
-	// aloca o pai que esta cheio e o novo diretorio
-	if (entradasLivres <= 0){
-		posPai = posLivreBitmap(0);
-		posDir = posLivreBitmap(posPai); 
-		
-		if (posPai != -1 && posDir != -1) {
-			escreveChar(arquivo, 1, iniBitmap + posPai, 1);
-			escreveChar(arquivo, 1, iniBitmap + posDir, 1);
-			expandeFAT(iniRaiz, posPai);			//atualiza o FAT da posPai 
-			FAT[posDir] = -1;
-			
-			novoDir = setStruct(nomeDir, mapeiaBitmapEmByte(posDir), 9, 8, 7, -1);
-			escreveStruct(arquivo, novoDir, mapeiaBitmapEmByte(posPai)+4, 1);
-
-			return posDir; 
-		}
-		else {
-			printf("Nao foi possivel criar o diretorio %s: Memoria cheia!!!\n", nomeDir);
-		} 
-	} 
-	
-	// aloca o novo diretorio
-	else {
-		posDir = posLivreBitmap(0); 
-	
-		if(posDir != -1) {
-			escreveChar(arquivo, 1, iniBitmap + posDir, 1);
-			FAT[posDir] = -1;
-
-			novoDir = setStruct(nomeDir, mapeiaBitmapEmByte(posDir), 9, 8, 7, -1);
-			escreveStruct(arquivo, novoDir, mapeiaBitmapEmByte(posPai)+4, 1);
-			return posDir;
-		}
-		else{
-			printf("Nao foi possivel criar o diretorio %s: Memoria cheia!!!\n", nomeDir);
-		} 
-	}
-
-	return -1;
+int mapsBlockToFAT(int endBloco) {
+	return (int)((endBloco - raiz.byteInicio)/TAM_BLOCO);
 }
-*/
+
+int mapsFATtoBlock(int endFAT) {
+	return (int)(raiz.byteInicio + endFAT * TAM_BLOCO);
+}
+
+int mapeiaBitmapEmByte(int posBitmap) {
+	return (int)(raiz.byteInicio + posBitmap * TAM_BLOCO);
+}
+
+// escreve bloco de dados do diretorio no FS
+void alocaDiretorio(int byteInicio) {
+	escreveInt(arquivo, totalArquivo, byteInicio, 1);
+	escreveChar(arquivo, '\0', byteInicio+4, TAM_BLOCO-4);
+}

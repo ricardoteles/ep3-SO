@@ -5,13 +5,18 @@ SUPERBLOCO
 - criar o número mágico
 - colocar blocos usados, memoria desperdicada, atributos do diretorio raiz, qtdadeDiretorios, qtdadeArquivos, espacoLivre, espacoDesperdicado
 
-- regravar superbloco no disco após a simulaçao
+- regravar superbloco no disco após a simulaçao (OK)
 
 ----------
 MKDIR
 ----------
 
-- ao tentar dar um mkdir em um FS já criado, ele não deixa criar
+----------
+LS
+----------
+
+- ao tentar dar um ls em um FS já populado, ele mostra os dados "zuados"
+
 
 -----------------------------------
 SISTEMA DE ARQUIVO (25x1024 blocos)
@@ -35,3 +40,14 @@ REMOVER
 
 - o converte.c e o converte.o do Makefile
 - o escreveRaiznodisco pela alocaDiretorio
+- comentarios desnecessarios
+
+
+-------
+ESPAÇO
+-------
+- aumentar o tamanho do bloco e do FS
+(4kb = 4000)
+
+
+

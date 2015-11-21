@@ -19,25 +19,25 @@ void criaBitMap();
 
 /*************** FAT ******************/
 void criaFAT();
-void carregaFATnaMemoria(int inicioBytes, int quantidadeBlocos);
-void regravaFATnoDisco(int inicioBytes, int nbytes);
+void carregaFATnaMemoria();
+void regravaFATnoDisco();
 void imprimeFAT(int quantidadeBlocos);
 
 /*************** DADOS ******************/
-void escreveRaizEmDisco(); 
 void alocaDiretorio(int byteInicio);
 Arquivo setStruct(char nome[20], int byteInicio, int tempoCriado, 
 				  int tempoAcessado, int tempoModificado, int tamanho); 
 
-int mkdir(char* nomeDir);
-void ls(int iniBytes);
+int mkdir(char* path);
+void listDirectory(int iniBytes);
+void ls(char* path);
 /*********************** ARVORE ************************/
-void percorreArvoreFS(char* path);
+void percorreArvoreFS();
 
 int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco);
 int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai);
-int insereEntradaPorBloco(Arquivo entrada, int endInicioBloco);
-int insereEntradaEmDiretorio(Arquivo entrada);
+int insereEntradaPorBloco(int endInicioBloco);
+int insereEntradaEmDiretorio(Arquivo* entrada);
 
 int posLivreBitmap(int inicioBusca);
 void expandeFAT(int posicaoInicio, int novaPos);

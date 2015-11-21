@@ -23,4 +23,4 @@ converte.o: converte.c
 	$(cc) -c $(dflags) $(cflags) $^ 
 
 clean:
-	-rm -f $(exec) $(objs) *.h.gch *~core* /tmp/unidade* converte.o
+	-rm -f $(exec) $(objs) *.h.gch *~core* /tmp/uni* converte.o

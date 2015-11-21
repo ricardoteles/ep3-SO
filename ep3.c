@@ -58,8 +58,8 @@ void interpretaComandosShell() {
 
 	else if (strcmp(word[0], "mkdir") == 0) {
 		if (word[1][0] != '\0') {
-			if (mkdir(word[1])) 
-				printf("mkdir %s foi realizado com sucesso\n", word[1]);
+			if (mkdir(word[1])) ;
+				//printf("mkdir %s foi realizado com sucesso\n", word[1]);
 			
 			else printf("Falha ao criar o diretorio %s\n", word[1]); 
 		}
@@ -90,7 +90,7 @@ void interpretaComandosShell() {
 			printf("\n---------------------------------------------------------------\n");
 			printf("nome			  tempoModificacao	      tamanho\n");
 			printf("---------------------------------------------------------------\n");
-			ls(960);
+			ls(word[1]);
 			printf("\n");
 		}
 	}
