@@ -52,7 +52,7 @@ void interpretaComandosShell() {
 
 	else if (strcmp(word[0], "cp") == 0) {
 		if (word[1][0] != '\0' && word[2][0] != '\0') {
-			printf("cp %s %s\n", word[1], word[2]);
+			cp(word[1], word[2]);
 		}
 	}
 
@@ -72,7 +72,7 @@ void interpretaComandosShell() {
 	}
 	else if (strcmp(word[0], "cat") == 0) {
 		if (word[1][0] != '\0') {
-			printf("cat %s\n", word[1]);
+			cat(word[1]);
 		}		
 	}
 	else if (strcmp(word[0], "touch") == 0) {

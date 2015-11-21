@@ -33,6 +33,8 @@ int mkdir(char* path);
 void listDirectory(int iniBytes);
 void ls(char* path);
 int touch(char* path);
+void cp(char* origem, char* destino);
+void cat(char* path);
 /*********************** ARVORE ************************/
 void percorreArvoreFS();
 

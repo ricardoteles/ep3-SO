@@ -1,3 +1,8 @@
+#include <sys/types.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include "dados.h"
 #include "binario.h"
@@ -155,7 +160,7 @@ void ls(char* path) {
 	if (strcmp("/\0", path) != 0) {
 		numNiveis = parserPath(path);
 
-		percorreArvoreFS(path);
+		percorreArvoreFS();
 
 		int endFatPai = mapsBlockToFAT(addressBlock[numNiveis-1]);
 		endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], endFatPai, addressBlock[numNiveis-1], NULL);
@@ -174,7 +179,7 @@ int mkdir(char* path) {
 
 	numNiveis = parserPath(path);
 
-	percorreArvoreFS(path);
+	percorreArvoreFS();
 
 	strcpy(nome, matrizPath[numNiveis-1]);
 
@@ -204,7 +209,7 @@ int touch(char* path) {
 
 	numNiveis = parserPath(path);
 	
-	percorreArvoreFS(path);
+	percorreArvoreFS();
 
 	endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
 					addressBlock[numNiveis-1], &novo);
@@ -220,22 +225,71 @@ int touch(char* path) {
 			escreveStruct(arquivo, novo, endEntry, 1);
 			alocaArquivo(novo.byteInicio);
 
-			// teste
-		 	if (addressBlock[numNiveis-1] > 0)
-				listDirectory(addressBlock[numNiveis-1]);
-
-			printf("Tempo de acesso: %d\n", novo.tempoAcessado);
 			return 1;
 		}
 	}
 	else {										// atualiza o tempo de acesso
 		novo.tempoAcessado = 1729;	// TODO: pegar o tempo atual
 		escreveStruct(arquivo, novo, novo.byteInicio, 1);	
-		printf("Tempo de acesso: %d\n", novo.tempoAcessado);
+		// printf("Tempo de acesso: %d\n", novo.tempoAcessado);
 
 	}
 
 	return 0;
+}
+
+void cp(char* origem, char* destino) {
+	int in_fd, rd_count;
+	char buffer[TAM_BLOCO];
+	int endFinal, i;
+	int totalBytes = 0;
+	Arquivo reg;
+
+	in_fd = open(origem, O_RDONLY);
+	if(in_fd < 0){
+		printf("Arquivo nao encontrado");
+	}
+
+	touch(destino);		// cria o arquivo destino
+
+	numNiveis = parserPath(destino);
+	percorreArvoreFS();
+
+	endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
+					addressBlock[numNiveis-1], &reg);	
+
+	while(1){ // TODO: ver o FAT e atualizar os tempos
+		rd_count = read(in_fd, buffer, TAM_BLOCO);
+		if(rd_count <= 0) 
+			break;
+
+		totalBytes += rd_count;
+
+		for(i = 0; i < rd_count; i++){
+			escreveChar(arquivo, buffer[i], endFinal+i, 1);
+			printf("buffer[%d] =  %c\n", i, buffer[i]);
+		}
+	}
+
+	reg.tamanho = totalBytes;
+	escreveStruct(arquivo, reg, reg.byteInicio, 1);
+
+	close(in_fd);
+}
+
+void cat(char* path) {
+	int endFinal, i;
+	Arquivo arq;
+
+	numNiveis = parserPath(path);
+	percorreArvoreFS();
+
+	endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
+					addressBlock[numNiveis-1], &arq);	
+
+	printf("TAM: %d\n", arq.tamanho);
+	for(i = 0; i < arq.tamanho; i++)
+		printf("%c", leChar(arquivo, endFinal+i));
 }
 
 int posLivreBitmap(int inicioBusca) {
