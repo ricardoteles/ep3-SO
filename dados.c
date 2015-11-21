@@ -158,7 +158,7 @@ void ls(char* path) {
 		percorreArvoreFS(path);
 
 		int endFatPai = mapsBlockToFAT(addressBlock[numNiveis-1]);
-		endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], endFatPai, addressBlock[numNiveis-1]);
+		endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], endFatPai, addressBlock[numNiveis-1], NULL);
 	}
 	else {
 		endFinal = raiz.byteInicio;
@@ -170,17 +170,10 @@ void ls(char* path) {
 int mkdir(char* path) {
 	char nome[20];
 	Arquivo novo;
-	//int i;
 	int endEntry;
 
 	numNiveis = parserPath(path);
 
-	// for (i = 0; i < MAX_NIVEIS; i++)
-	// 	addressBlock[i] = 0;
-
-	// printf("Path:@");
-	// imprimePath(); 
-	
 	percorreArvoreFS(path);
 
 	strcpy(nome, matrizPath[numNiveis-1]);
@@ -198,6 +191,48 @@ int mkdir(char* path) {
 			listDirectory(addressBlock[numNiveis-1]);
 
 		return 1;
+	}
+
+	return 0;
+}
+
+int touch(char* path) {
+	char nome[20];
+	Arquivo novo;
+	int endEntry;
+	int endFinal;
+
+	numNiveis = parserPath(path);
+	
+	percorreArvoreFS(path);
+
+	endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
+					addressBlock[numNiveis-1], &novo);
+
+	if(endFinal < 0) { 							// se arquivo nao existe
+		strcpy(nome, matrizPath[numNiveis-1]);
+
+		novo = setStruct(nome, 0, 10, 10, 10, 0); 
+
+		endEntry = insereEntradaEmDiretorio(&novo);
+
+		if (endEntry) {	
+			escreveStruct(arquivo, novo, endEntry, 1);
+			alocaArquivo(novo.byteInicio);
+
+			// teste
+		 	if (addressBlock[numNiveis-1] > 0)
+				listDirectory(addressBlock[numNiveis-1]);
+
+			printf("Tempo de acesso: %d\n", novo.tempoAcessado);
+			return 1;
+		}
+	}
+	else {										// atualiza o tempo de acesso
+		novo.tempoAcessado = 1729;	// TODO: pegar o tempo atual
+		escreveStruct(arquivo, novo, novo.byteInicio, 1);	
+		printf("Tempo de acesso: %d\n", novo.tempoAcessado);
+
 	}
 
 	return 0;
@@ -223,7 +258,7 @@ void percorreArvoreFS() {
 	
 	for (i = 1; i < numNiveis; i++) {
 		endPai = buscaEntradaEmDiretorio(matrizPath[i-1], mapsBlockToFAT(addressBlock[i-1]), 
-														  addressBlock[i-1]);
+														  addressBlock[i-1], NULL);
 		addressBlock[i] = endPai; // vai salvando o caminho
 	}
 
@@ -237,12 +272,12 @@ void percorreArvoreFS() {
 // busca por endereco da entrada no diretorio endInicioFAT, 
 // cujo endereco de bloco eh endInicioBloco 
 // => pra montar a arvore :)
-int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco) {
+int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco, Arquivo* reg) {
 	int endPai, endEntrada;
 
 	// percorre a lista ligada do diretorio
 	for (endPai = endInicioFAT; endPai != -1; endPai = FAT[endPai]) {
-		endEntrada = buscaEnderecoDaEntradaPorBloco(entrada, endInicioBloco);
+		endEntrada = buscaEnderecoDaEntradaPorBloco(entrada, endInicioBloco, reg);
 		
 		if (endEntrada != -1)
 			return endEntrada;
@@ -251,7 +286,7 @@ int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco)
 }
 
 // retorna endereco do bloco de inicio da entrada ou -1 => pra montar a arvore :)
-int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai) {
+int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai, Arquivo* reg) {
 	int numEntradasLivres = leInt(arquivo, enderecoBlocoPai);
 	int pos;
 	int numEntradas = totalArquivo - numEntradasLivres; 
@@ -266,6 +301,7 @@ int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai) {
 				Arquivo arq = leStruct(arquivo, pos);
 
 				if (strcmp(entrada, &arq.nome[0]) == 0) {
+					if(reg != NULL) *reg = arq;
 					return arq.byteInicio;
 				}
 				else pos++;
@@ -378,4 +414,8 @@ int mapeiaBitmapEmByte(int posBitmap) {
 void alocaDiretorio(int byteInicio) {
 	escreveInt(arquivo, totalArquivo, byteInicio, 1);
 	escreveChar(arquivo, '\0', byteInicio+4, TAM_BLOCO-4);
+}
+
+void alocaArquivo(int byteInicio) {
+	escreveChar(arquivo, '\0', byteInicio, TAM_BLOCO);
 }

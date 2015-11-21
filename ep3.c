@@ -77,7 +77,7 @@ void interpretaComandosShell() {
 	}
 	else if (strcmp(word[0], "touch") == 0) {
 		if (word[1][0] != '\0') {
-			printf("touch %s\n", word[1]);
+			touch(word[1]);			
 		}
 	}
 	else if (strcmp(word[0], "rm") == 0) {

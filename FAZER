@@ -17,7 +17,6 @@ LS
 
 - ao tentar dar um ls em um FS já populado, ele mostra os dados "zuados"
 
-
 -----------------------------------
 SISTEMA DE ARQUIVO (25x1024 blocos)
 -----------------------------------
@@ -48,6 +47,3 @@ ESPAÇO
 -------
 - aumentar o tamanho do bloco e do FS
 (4kb = 4000)
-
-
-

@@ -25,17 +25,19 @@ void imprimeFAT(int quantidadeBlocos);
 
 /*************** DADOS ******************/
 void alocaDiretorio(int byteInicio);
+void alocaArquivo(int byteInicio);
 Arquivo setStruct(char nome[20], int byteInicio, int tempoCriado, 
 				  int tempoAcessado, int tempoModificado, int tamanho); 
 
 int mkdir(char* path);
 void listDirectory(int iniBytes);
 void ls(char* path);
+int touch(char* path);
 /*********************** ARVORE ************************/
 void percorreArvoreFS();
 
-int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco);
-int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai);
+int buscaEntradaEmDiretorio(char* entrada, int endInicioFAT, int endInicioBloco, Arquivo* reg);
+int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai, Arquivo* reg);
 int insereEntradaPorBloco(int endInicioBloco);
 int insereEntradaEmDiretorio(Arquivo* entrada);
 
