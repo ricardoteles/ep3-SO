@@ -34,3 +34,4 @@ REMOVER
 -------
 
 - o converte.c e o converte.o do Makefile
+- o escreveRaiznodisco pela alocaDiretorio

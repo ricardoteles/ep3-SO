@@ -5,20 +5,20 @@ static void limpaMatrizPath();
 
 int parserPath(char *path) {
 	int i, lin = 0, col = 0;
-
 	limpaMatrizPath();
 
 	for (i = 0; path[i] != '\0'; i++) {
 		if (path[i] != '/') {
 			matrizPath[lin][col++] = path[i];
 		}
-		else {
+		else if (col != 0) {
 			lin++;
 			col = 0;
 		}
 	}
 
-	return lin;
+	//printf("return : %d\n", lin+1);
+	return (lin+1);
 }
 
 static void limpaMatrizPath() {
@@ -29,4 +29,12 @@ static void limpaMatrizPath() {
 			matrizPath[i][j] = 0;
 		}
 	}
+}
+
+void imprimePath() {
+	int i;
+
+	for (i = 0; matrizPath[i][0] != 0; i++) {
+		printf("%s\n", matrizPath[i]);
+	}	
 }

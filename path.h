@@ -7,5 +7,6 @@
 char matrizPath[LINPATH][COLPATH];
 
 int parserPath(char *path);
+void imprimePath();
 
 #endif

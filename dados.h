@@ -2,7 +2,7 @@
 #define DADOS_H
 
 typedef struct arquivo {
-	char* nome;
+	char nome[20];
 	int byteInicio;
 	int tempoCriado;
 	int tempoModificado;
@@ -26,12 +26,11 @@ void imprimeFAT(int quantidadeBlocos);
 /*************** DADOS ******************/
 void escreveRaizEmDisco(); 
 void alocaDiretorio(int byteInicio);
-Arquivo setStruct(char* nome, int byteInicio, int tempoCriado, 
+Arquivo setStruct(char nome[20], int byteInicio, int tempoCriado, 
 				  int tempoAcessado, int tempoModificado, int tamanho); 
 
 int mkdir(char* nomeDir);
-void ls(char* nome, int tempoModificado, int tamanho);
-
+void ls(int iniBytes);
 /*********************** ARVORE ************************/
 void percorreArvoreFS(char* path);
 

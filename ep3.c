@@ -90,7 +90,7 @@ void interpretaComandosShell() {
 			printf("\n---------------------------------------------------------------\n");
 			printf("nome			  tempoModificacao	      tamanho\n");
 			printf("---------------------------------------------------------------\n");
-			// ls(word[1], 23213, 4096);
+			ls(960);
 			printf("\n");
 		}
 	}
