@@ -211,10 +211,11 @@ int touch(char* path) {
 	
 	percorreArvoreFS();
 
+	// existe ou não o arquivo ?
 	endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
 					addressBlock[numNiveis-1], &novo);
 
-	if(endFinal < 0) { 							// se arquivo nao existe
+	if (endFinal < 0) { 							// se arquivo nao existe
 		strcpy(nome, matrizPath[numNiveis-1]);
 
 		novo = setStruct(nome, 0, 10, 10, 10, 0); 
@@ -225,54 +226,54 @@ int touch(char* path) {
 			escreveStruct(arquivo, novo, endEntry, 1);
 			alocaArquivo(novo.byteInicio);
 
-			return 1;
+			return endEntry;
 		}
 	}
 	else {										// atualiza o tempo de acesso
 		novo.tempoAcessado = 1729;	// TODO: pegar o tempo atual
-		escreveStruct(arquivo, novo, novo.byteInicio, 1);	
+		escreveStruct(arquivo, novo, endEntry, 1);	
 		// printf("Tempo de acesso: %d\n", novo.tempoAcessado);
 
+		return 1;
 	}
 
 	return 0;
 }
 
+// Referencia: Tanenbaum (copia de arquivo)
 void cp(char* origem, char* destino) {
 	int in_fd, rd_count;
 	char buffer[TAM_BLOCO];
-	int endFinal, i;
-	int totalBytes = 0;
+	int endEntry, i, totalBytes = 0;
 	Arquivo reg;
 
 	in_fd = open(origem, O_RDONLY);
-	if(in_fd < 0){
+	
+	if (in_fd < 0) {
 		printf("Arquivo nao encontrado");
 	}
 
-	touch(destino);		// cria o arquivo destino
+	endEntry = touch(destino);		// cria o arquivo destino e retorna a posicao 
+									// onde o registro foi inserido
 
-	numNiveis = parserPath(destino);
-	percorreArvoreFS();
+	reg = leStruct(arquivo, endEntry);
 
-	endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
-					addressBlock[numNiveis-1], &reg);	
-
-	while(1){ // TODO: ver o FAT e atualizar os tempos
+	while (1) { // TODO: ver o FAT e atualizar os tempos
 		rd_count = read(in_fd, buffer, TAM_BLOCO);
-		if(rd_count <= 0) 
+		if (rd_count <= 0) 
 			break;
 
 		totalBytes += rd_count;
+		// expandir o arquivo!
 
-		for(i = 0; i < rd_count; i++){
-			escreveChar(arquivo, buffer[i], endFinal+i, 1);
-			printf("buffer[%d] =  %c\n", i, buffer[i]);
+		for (i = 0; i < rd_count; i++) {
+			escreveChar(arquivo, buffer[i], reg.byteInicio+i, 1);
+			//printf("buffer[%d] =  %c\n", i, buffer[i]);
 		}
 	}
 
 	reg.tamanho = totalBytes;
-	escreveStruct(arquivo, reg, reg.byteInicio, 1);
+	escreveStruct(arquivo, reg, endEntry, 1);
 
 	close(in_fd);
 }
@@ -288,7 +289,7 @@ void cat(char* path) {
 					addressBlock[numNiveis-1], &arq);	
 
 	printf("TAM: %d\n", arq.tamanho);
-	for(i = 0; i < arq.tamanho; i++)
+	for (i = 0; i < arq.tamanho; i++)
 		printf("%c", leChar(arquivo, endFinal+i));
 }
 
@@ -355,7 +356,7 @@ int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai, Arquivo*
 				Arquivo arq = leStruct(arquivo, pos);
 
 				if (strcmp(entrada, &arq.nome[0]) == 0) {
-					if(reg != NULL) *reg = arq;
+					if (reg != NULL) *reg = arq;
 					return arq.byteInicio;
 				}
 				else pos++;
@@ -364,7 +365,6 @@ int buscaEnderecoDaEntradaPorBloco(char* entrada, int enderecoBlocoPai, Arquivo*
 	}
 	return -1;
 }
-
 
 // retorna o endereco do bloco da entrada onde deve inserir
 int insereEntradaPorBloco(int endInicioBloco) {
