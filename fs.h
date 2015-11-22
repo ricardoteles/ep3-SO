@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include "dados.h"
 
-// #define TAM_FS				262144		/* tamanho do FS em bytes (= 256KB) */
-// #define TAM_BLOCO			  4096		/* tamanho do bloco em bytes (= 4KB) */
+// #define TAM_FS			  100000000		/* tamanho do FS em bytes (= 100 MB) */
+// #define TAM_BLOCO			   4000		/* tamanho do bloco em bytes (=4 KB) */
 
 #define TAM_FS				     16000		
 #define TAM_BLOCO			  	 160		
@@ -27,7 +27,6 @@ int qteDiretorios;
 int qteArquivos;
 int espacoLivre;
 int espacoDesperd;
-
 
 int changeFAT;
 

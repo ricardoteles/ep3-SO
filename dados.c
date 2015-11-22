@@ -13,6 +13,8 @@
 #include "path.h"
 
 #define MAX_NIVEIS 100
+#define NUM_ARQ_DIR 4
+
 
 int addressBlock[MAX_NIVEIS];
 int numNiveis;
@@ -81,7 +83,7 @@ void criaSuperBloco() {
 	iniFat = 2 * TAM_BLOCO;
 	raiz = setStruct("/\0", (int)(iniFat + TAM_FAT), data(), data(), data(), -1);
 	
-	memUsada = 4;
+	memUsada = NUM_ARQ_DIR;
 
 	qtadeBlocos = (TAM_FS - raiz.byteInicio)/TAM_BLOCO;
 	qtadeBlocosLivres = qtadeBlocos - 1;
@@ -93,7 +95,7 @@ void criaSuperBloco() {
 	escreveInt(arquivo, 0, 0, TAM_BLOCO);	// preenche com zero				  
 	
 
-	escreveInt(arquivo, qtadeBlocos,  		0, 	1);					// escreve numero de blocos totais
+	escreveInt(arquivo, qtadeBlocos,  		0 ,  1);				// escreve numero de blocos totais
 	escreveInt(arquivo, qtadeBlocosLivres,  4 ,  1);				// escreve # blocos livres
 	escreveInt(arquivo, memUsada, 	   		8 ,  1);				// escreve mem. utilizada
 	escreveInt(arquivo, qteDiretorios, 		12,  1);				// escreve qte diretorios
@@ -145,6 +147,14 @@ void regravaFATnoDisco() {
 }
 
 /*********************************************** MKDIR ****************************************/ 
+void df() {
+	espacoLivre = (TAM_FS - raiz.byteInicio) - memUsada;
+	espacoDesperd = (qtadeBlocos - qtadeBlocosLivres) * TAM_BLOCO - memUsada;
+
+	escreveInt(arquivo, espacoLivre  , 20, 1);
+	escreveInt(arquivo, espacoDesperd, 24, 1);
+}
+
 void ls(char* path) {
 	int endFinal;
 
@@ -182,6 +192,12 @@ int mkdir(char* path) {
 		escreveStruct(arquivo, novo, endEntry, 1);
 		alocaDiretorio(novo.byteInicio);
 
+		memUsada += (NUM_ARQ_DIR + sizeof(Arquivo));
+		escreveInt(arquivo, memUsada,  8, 1);
+		
+		qteDiretorios++;			
+		escreveInt(arquivo, qteDiretorios, 12, 1);
+
 		return 1;
 	}
 
@@ -211,7 +227,13 @@ int touch(char* path) {
 
 		if (endEntry) {	
 			escreveStruct(arquivo, novo, endEntry, 1);
+			qteArquivos++;
+			escreveInt(arquivo, qteArquivos, 16, 1);
+
 			alocaArquivo(novo.byteInicio);
+
+			memUsada += sizeof(Arquivo);
+			escreveInt(arquivo, memUsada, 8, 1);
 
 			return endEntry;
 		}
@@ -236,7 +258,7 @@ void cp(char* origem, char* destino) {
 	in_fd = open(origem, O_RDONLY);
 	
 	if (in_fd < 0) {
-		printf("Arquivo nao encontrado");
+		printf("Arquivo nao encontrado\n");
 	}
 
 	endEntry = touch(destino);		// cria o arquivo destino e retorna a posicao 
@@ -263,6 +285,8 @@ void cp(char* origem, char* destino) {
 	
 	reg.tamanho = totalBytes;
 	escreveStruct(arquivo, reg, endEntry, 1);
+	memUsada += totalBytes;
+	escreveInt(arquivo, memUsada, 8, 1);
 
 	close(in_fd);
 }
@@ -413,6 +437,7 @@ int insereEntradaEmDiretorio(Arquivo* entrada) {
 			{		
 				// aloca bloco do diretorio
 				qtadeBlocosLivres--;
+				escreveInt(arquivo, qtadeBlocosLivres, 4, 1);
 				int novoBloco = posLivreBitmap(1);
 				escreveChar(arquivo, 1, iniBitmap + novoBloco, 1); // seta 1 no bitmap
 				FAT[novoBloco] = -1; // inicio do diretorio	
@@ -429,6 +454,7 @@ int insereEntradaEmDiretorio(Arquivo* entrada) {
 		{
 			// algo a mais ...
 			qtadeBlocosLivres -= 2;
+			escreveInt(arquivo, qtadeBlocosLivres, 4, 1);
 
 			int novoBlocoPai = posLivreBitmap(0);	
 			// seta 1 no bitmap (bloco do pai para alocar entrada)
@@ -458,6 +484,8 @@ void expandeFAT(int posicaoInicio, int novaPos) {
 
 	FAT[i] = novaPos;
 	FAT[novaPos] = -1;
+
+	regravaFATnoDisco();
 }
 
 int mapsBlockToFAT(int endBloco) {

@@ -7,20 +7,7 @@ char blocoRaiz[TAM_BLOCO];
 
 int umountFS() {
 	if (arquivo != NULL) {
-		// if (changeFAT)
-		regravaFATnoDisco();
 
-		escreveInt(arquivo, qtadeBlocos 		,  0, 1);
-		escreveInt(arquivo, qtadeBlocosLivres	,  4, 1);
-		escreveInt(arquivo, memUsada			,  8, 1);
-		escreveInt(arquivo, qteDiretorios		, 12, 1);
-		escreveInt(arquivo, qteArquivos			, 16, 1);
-		escreveInt(arquivo, espacoLivre			, 20, 1);
-		escreveInt(arquivo, espacoDesperd		, 24, 1);
-		escreveInt(arquivo, iniBitmap			, 28, 1);
-		escreveInt(arquivo, iniFat				, 32, 1);
-		escreveStruct(arquivo, raiz 			, 36, 1);
-		
 		fclose(arquivo);
 		arquivo = NULL;
 		
@@ -65,12 +52,7 @@ void carregaFS() {
 	raiz        	  = leStruct(arquivo, 36);		// le Raiz do superbloco
 
 	carregaFATnaMemoria();
-
-	printf("Carreguei os dados:\n");
-	printf(" #blocos: %d\n #blocos livre: %d\n qteDiretorios: %d\n qteArquivos: %d\n espacoLivre: %d\n espacoDesperd: %d\n Bitmap: %d\n FAT: %d\n Raiz: %d\n", 
-		qtadeBlocos, qtadeBlocosLivres, qteDiretorios, qteArquivos, espacoLivre, espacoDesperd, iniBitmap, iniFat, raiz.byteInicio);
 }
-
 
 int existeFS(char* fname) {
 	// r+b eh modo que obriga existencia do arquivo binario
