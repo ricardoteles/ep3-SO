@@ -1,21 +1,8 @@
 ----------
-SUPERBLOCO
-----------
-
-- criar o número mágico
-- colocar blocos usados, memoria desperdicada, atributos do diretorio raiz, qtdadeDiretorios, qtdadeArquivos, espacoLivre, espacoDesperdicado
-
-- regravar superbloco no disco após a simulaçao (OK)
-
-----------
-MKDIR
-----------
-
-----------
 LS
 ----------
 
-- ao tentar dar um ls em um FS já populado, ele mostra os dados "zuados"
+- ao tentar dar um ls em um FS já populado, ele mostra os dados "zuados" ao listar o segundo nível
 
 -----------------------------------
 SISTEMA DE ARQUIVO (25x1024 blocos)
@@ -26,21 +13,12 @@ SISTEMA DE ARQUIVO (25x1024 blocos)
 - reserva o restante para FAT e para a regiao dos dados
 
 -------
-LEIAME
--------
-
-- fazer o leiame (colocar as decisoes tomadas no FS)
-- escrever as dependencias
-- verificar se o nome do arquivo em pdf é apresentacao.pdf
-
--------
 REMOVER
 -------
 
 - o converte.c e o converte.o do Makefile
 - o escreveRaiznodisco pela alocaDiretorio
 - comentarios desnecessarios
-
 
 -------
 ESPAÇO

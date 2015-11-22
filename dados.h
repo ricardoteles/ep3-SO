@@ -35,6 +35,7 @@ void ls(char* path);
 int touch(char* path);
 void cp(char* origem, char* destino);
 void cat(char* path);
+void df();
 /*********************** ARVORE ************************/
 void percorreArvoreFS();
 
