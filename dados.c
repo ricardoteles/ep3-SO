@@ -79,12 +79,12 @@ void criaSuperBloco() {
 	
 	escreveInt(arquivo, 0, 0, TAM_BLOCO);	// preenche com zero				  
 	
-	escreveInt(arquivo, qtadeBlocos,  0,  	1);		// escreve numero de blocos totais
+	escreveInt(arquivo, qtadeBlocos,  		0,   1);		// escreve numero de blocos totais
 	escreveInt(arquivo, qtadeBlocosLivres,  4 ,  1);		// escreve # blocos livres
-	escreveInt(arquivo, memUsada, 	   8 ,  1);		// escreve mem. utilizada
-	escreveInt(arquivo, iniBitmap, 			   12,  1);		// escreve inicio bitmap
-	escreveInt(arquivo, iniFat, 		   16,  1);		// escreve inicio FAT
-	escreveStruct(arquivo, raiz, 			   20,  1);		// escreve entrada da raiz
+	escreveInt(arquivo, memUsada, 	   		8 ,  1);		// escreve mem. utilizada
+	escreveInt(arquivo, iniBitmap, 			12,  1);		// escreve inicio bitmap
+	escreveInt(arquivo, iniFat, 		   	16,  1);		// escreve inicio FAT
+	escreveStruct(arquivo, raiz, 			20,  1);		// escreve entrada da raiz
 }
 
 void criaBitMap() {
@@ -105,7 +105,7 @@ void carregaFATnaMemoria() {
 
 		fseek(arquivo, iniFat, SEEK_SET);
 
-		for (i = 0; i < TAM_FAT; i++) {
+		for (i = 0; i < TAM_BLOCO; i++) {
 			if (fread(&val, sizeof(int), 1, arquivo) == 1) {
 				FAT[i] = val;
 			}
@@ -119,7 +119,7 @@ void regravaFATnoDisco() {
 
 		fseek(arquivo, iniFat, SEEK_SET);
 
-		for (i = 0; i < TAM_FAT; i++)
+		for (i = 0; i < TAM_BLOCO; i++)
 			if (fwrite (&FAT[i], sizeof(int), 1, arquivo) != 1)
 				printf("Não escreveu 1 int!\n");
 	}
@@ -191,10 +191,6 @@ int mkdir(char* path) {
 		escreveStruct(arquivo, novo, endEntry, 1);
 		alocaDiretorio(novo.byteInicio);
 
-		// teste
-	 	if (addressBlock[numNiveis-1] > 0)
-			listDirectory(addressBlock[numNiveis-1]);
-
 		return 1;
 	}
 
@@ -242,8 +238,8 @@ int touch(char* path) {
 
 // Referencia: Tanenbaum (copia de arquivo)
 void cp(char* origem, char* destino) {
-	int in_fd, rd_count;
-	char buffer[TAM_BLOCO];
+	int in_fd, rd_count, endBlock;
+	char buffer[10];
 	int endEntry, i, totalBytes = 0;
 	Arquivo reg;
 
@@ -257,18 +253,27 @@ void cp(char* origem, char* destino) {
 									// onde o registro foi inserido
 
 	reg = leStruct(arquivo, endEntry);
+	endBlock = reg.byteInicio;
 
-	while (1) { // TODO: ver o FAT e atualizar os tempos
-		rd_count = read(in_fd, buffer, TAM_BLOCO);
+	while (1) { 
+		rd_count = read(in_fd, buffer, 10);
 		if (rd_count <= 0) 
 			break;
 
 		totalBytes += rd_count;
-		// expandir o arquivo!
 
 		for (i = 0; i < rd_count; i++) {
-			escreveChar(arquivo, buffer[i], reg.byteInicio+i, 1);
+			escreveChar(arquivo, buffer[i], endBlock+i, 1);
 			//printf("buffer[%d] =  %c\n", i, buffer[i]);
+		}
+
+		if (rd_count == TAM_BLOCO) {
+			int novoBloco = posLivreBitmap(1);
+			escreveChar(arquivo, 1, iniBitmap + novoBloco, 1); 
+			
+			endBlock = mapsFATtoBlock(novoBloco);
+			expandeFAT(novoBloco, endBlock);
+			alocaArquivo(endBlock); 
 		}
 	}
 
@@ -279,18 +284,32 @@ void cp(char* origem, char* destino) {
 }
 
 void cat(char* path) {
-	int endFinal, i;
+	int endBlock, endFat, i, nbytes = 0;
 	Arquivo arq;
+	char c;
 
 	numNiveis = parserPath(path);
 	percorreArvoreFS();
 
-	endFinal = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
+	endBlock = buscaEntradaEmDiretorio(matrizPath[numNiveis-1], mapsBlockToFAT(addressBlock[numNiveis-1]), 
 					addressBlock[numNiveis-1], &arq);	
 
 	printf("TAM: %d\n", arq.tamanho);
-	for (i = 0; i < arq.tamanho; i++)
-		printf("%c", leChar(arquivo, endFinal+i));
+
+	for (endFat = mapsBlockToFAT(endBlock); endFat != -1; endFat = FAT[endFat]) {	
+		endBlock = mapsFATtoBlock(endFat); 
+		i = -1;
+
+		do {
+			i++;
+			c = leChar(arquivo, endBlock+i);
+
+			if (c == 0) break;
+
+			printf("%c", c);
+			
+		} while(i < TAM_BLOCO);
+	}
 }
 
 int posLivreBitmap(int inicioBusca) {
@@ -316,12 +335,6 @@ void percorreArvoreFS() {
 														  addressBlock[i-1], NULL);
 		addressBlock[i] = endPai; // vai salvando o caminho
 	}
-
-	// printf("Endereços encontrados:\n");
-	// for (i = 0; i < numNiveis; i++) {
-	// 	printf("%d ", addressBlock[i]);
-	// }
-	// printf("|\n\n");
 }
 
 // busca por endereco da entrada no diretorio endInicioFAT, 

@@ -9,7 +9,7 @@
 
 #define TAM_FS				     16000		
 #define TAM_BLOCO			  	 160		
-#define TAM_FAT					 4*TAM_BLOCO
+#define TAM_FAT					 4*TAM_BLOCO  // em bytes!
 
 FILE* arquivo;
 Arquivo raiz;

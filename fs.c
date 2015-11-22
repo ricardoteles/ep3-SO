@@ -3,6 +3,8 @@
 #include "dados.h"
 #include "binario.h"
 
+char blocoRaiz[TAM_BLOCO];
+
 int umountFS() {
 	if (arquivo != NULL) {
 		// if (changeFAT)
@@ -13,6 +15,7 @@ int umountFS() {
 		escreveInt(arquivo, iniBitmap, 12, 1);
 		escreveInt(arquivo, iniFat, 16, 1);
 		escreveStruct(arquivo, raiz, 20, 1);
+
 		fclose(arquivo);
 		arquivo = NULL;
 		return 1;
