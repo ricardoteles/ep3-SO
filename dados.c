@@ -17,8 +17,9 @@
 int addressBlock[MAX_NIVEIS];
 int numNiveis;
 const int totalArquivo = (TAM_BLOCO - 4)/(sizeof(Arquivo)); 
-void imprimeDiretorio(int inicioBytes);
 
+void imprimeDiretorio(int inicioBytes);
+int alocaBlocoArquivoFS(int posicaoInicio);
 
 char* data(){
     time_t tempo;
@@ -228,7 +229,7 @@ int touch(char* path) {
 // Referencia: Tanenbaum (copia de arquivo)
 void cp(char* origem, char* destino) {
 	int in_fd, rd_count, endBlock;
-	char buffer[10];
+	char buffer[TAM_BLOCO];
 	int endEntry, i, totalBytes = 0;
 	Arquivo reg;
 
@@ -243,34 +244,43 @@ void cp(char* origem, char* destino) {
 
 	reg = leStruct(arquivo, endEntry);
 	endBlock = reg.byteInicio;
-
-	while (1) { 
-		rd_count = read(in_fd, buffer, 10);
-		if (rd_count <= 0) 
-			break;
-
+	rd_count = read(in_fd, buffer, TAM_BLOCO);
+	
+	while (rd_count > 0) { 
 		totalBytes += rd_count;
 
 		for (i = 0; i < rd_count; i++) {
 			escreveChar(arquivo, buffer[i], endBlock+i, 1);
-			//printf("buffer[%d] =  %c\n", i, buffer[i]);
-			escreveChar(arquivo, buffer[i], reg.byteInicio+i, 1);
 		}
 
-		if (rd_count == TAM_BLOCO) {
-			int novoBloco = posLivreBitmap(1);
-			escreveChar(arquivo, 1, iniBitmap + novoBloco, 1); 
-			
-			endBlock = mapsFATtoBlock(novoBloco);
-			expandeFAT(novoBloco, endBlock);
-			alocaArquivo(endBlock); 
-		}
+		rd_count = read(in_fd, buffer, TAM_BLOCO);
+
+		if (rd_count <= 0)
+			break;
+
+		endBlock = alocaBlocoArquivoFS(mapsBlockToFAT(endBlock));
 	}
-
+	
 	reg.tamanho = totalBytes;
 	escreveStruct(arquivo, reg, endEntry, 1);
 
 	close(in_fd);
+}
+
+int alocaBlocoArquivoFS(int posicaoInicio) {
+	int oneNewBlock;
+	int blocoBitmap = posLivreBitmap(1);
+	
+	if (blocoBitmap) {
+		escreveChar(arquivo, 1, iniBitmap + blocoBitmap, 1); 
+			
+		oneNewBlock = mapsFATtoBlock(blocoBitmap);
+		expandeFAT(posicaoInicio, blocoBitmap);
+		//printf("oioioi\n");
+		alocaArquivo(oneNewBlock);
+	}
+
+	return oneNewBlock; 
 }
 
 void cat(char* path) {
