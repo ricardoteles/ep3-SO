@@ -5,17 +5,13 @@
 #include <readline/history.h>
 #include "fs.h"
 
+
 #define LINMAX 10
 #define COLMAX 50
 
 char word[LINMAX][COLMAX];
 
 int continua = 1;
-
-int qtdadeDiretorios = 0;
-int qtdadeArquivos = 0;
-int espacoLivre = 1600;
-int espacoDesperdicado = 0;
 
 /*================================= PROTOTIPOS ========================================*/
 void interpretaComandosShell();
@@ -87,9 +83,9 @@ void interpretaComandosShell() {
 	}
 	else if (strcmp(word[0], "ls") == 0) {
 		if (word[1][0] != '\0') {
-			printf("\n---------------------------------------------------------------\n");
-			printf("nome			  tempoModificacao	      tamanho\n");
-			printf("---------------------------------------------------------------\n");
+			printf("\n----------------------------------------------------------------------\n");
+			printf("nome              tamanho (Bytes)            tempoModificacao\n");
+			printf("----------------------------------------------------------------------\n");
 			ls(word[1]);
 			printf("\n");
 		}
@@ -100,10 +96,10 @@ void interpretaComandosShell() {
 		}
 	}
 	else if (strcmp(word[0], "df") == 0) {
-		printf("\nQuantidade de diretorios: %d\n", qtdadeDiretorios);	
-		printf("Quantidade de arquivos:   %d\n", qtdadeArquivos);	
+		printf("\nQuantidade de diretorios: %d\n", qteDiretorios);	
+		printf("Quantidade de arquivos:   %d\n", qteArquivos);	
 		printf("Espaco livre:             %d\n", espacoLivre);	
-		printf("Espaco desperdicado:      %d\n\n", espacoDesperdicado);	
+		printf("Espaco desperdicado:      %d\n\n", espacoDesperd);	
 	}
 	else if (strcmp(word[0], "umount") == 0) {
 		if (umountFS())	

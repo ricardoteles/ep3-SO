@@ -23,6 +23,11 @@ int iniBitmap;
 int iniFat;
 int FAT[TAM_FAT];
 
+int qteDiretorios;
+int qteArquivos;
+int espacoLivre;
+int espacoDesperd;
+
 
 int changeFAT;
 
