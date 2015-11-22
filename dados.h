@@ -4,13 +4,13 @@
 typedef struct arquivo {
 	char nome[20];
 	int byteInicio;
-	int tempoCriado;
-	int tempoModificado;
-	int tempoAcessado;
+	char tempoCriado[30];
+	char tempoModificado[30];
+	char tempoAcessado[30];
 	int tamanho;
 } Arquivo;
 
-
+char* data();
 /*************** SUPERBLOCO ******************/
 void criaSuperBloco();
 
@@ -26,8 +26,8 @@ void imprimeFAT(int quantidadeBlocos);
 /*************** DADOS ******************/
 void alocaDiretorio(int byteInicio);
 void alocaArquivo(int byteInicio);
-Arquivo setStruct(char nome[20], int byteInicio, int tempoCriado, 
-				  int tempoAcessado, int tempoModificado, int tamanho); 
+Arquivo setStruct(char nome[20], int byteInicio, char tempoCriado[30], 
+				  char tempoAcessado[30], char tempoModificado[30], int tamanho); 
 
 int mkdir(char* path);
 void listDirectory(int iniBytes);
